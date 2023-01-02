@@ -1,5 +1,8 @@
 import { AnyAction, Reducer, ReducersMapObject } from '@reduxjs/toolkit';
 
+type Listener = Function;
+type Nullable<T> = T | null;
+
 /**
  * The `ReducersManager` class is used to manage and extend a map of reducers,
  * represented as an object of slice reducers.
@@ -12,6 +15,7 @@ export class ReducersManager<State> {
   private reducers: ReducersMapObject;
   private combinedReducer: Reducer;
   private keysToRemove: string[] = [];
+  private changeListener : Nullable<Listener> = null;
 
   /**
    * Creates a `ReducersManager` instance.
@@ -102,6 +106,10 @@ export class ReducersManager<State> {
 
     this.combinedReducer = this.combineReducers({ ...this.reducers, ...reducerMap });
 
+    if (this.changeListener !== null) {
+      this.changeListener();
+    }
+
     function intersect(currentMap: ReducersMapObject, newMap: ReducersMapObject) {
       return Object
         .keys(currentMap)
@@ -123,4 +131,12 @@ export class ReducersManager<State> {
     this.keysToRemove.push(key);
     this.combinedReducer = this.combineReducers(this.reducers);
   };
+
+  public setChangeListener(listener: () => { }) {
+    if (this.changeListener !== null) {
+      throw new Error('Only one change listener is allowed');
+    }
+
+    this.changeListener = listener;
+  }
 }
