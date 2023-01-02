@@ -27,6 +27,8 @@ const LocalStorage: React.FC = () => {
       if(throttling) {
         throttling.cancel();
       }
+
+      localStorageManager.remove();
     }
   }, [persistState]);
 
