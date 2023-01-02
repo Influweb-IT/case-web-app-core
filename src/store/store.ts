@@ -27,6 +27,8 @@ const store = configureStore({
   preloadedState: localStorageManager.load() || initialRootState
 });
 
+reducersManager.setChangeListener(() => store.dispatch({ type: 'reducerManager/reducerAdded' }));
+
 export type AppDispatch = typeof store.dispatch;
 
 export default store;
