@@ -15,7 +15,8 @@ export const getReportsForUser = (
   from?: number,
   until?: number,
   ignoreReports?: string[],
-) => authApiInstance.get<ReportHistory>('/v1/reports', {
+  limit?: number
+  ) => authApiInstance.get<ReportHistory>('/v1/reports', {
   params: {
     studies: onlyForStudies ? onlyForStudies.join(',') : undefined,
     profileIds: onlyForProfiles ? onlyForProfiles.join(',') : undefined,
@@ -23,6 +24,7 @@ export const getReportsForUser = (
     from: from,
     until: until,
     ignoreReports: ignoreReports ? ignoreReports.join(',') : undefined,
+    limit: limit
   }
 });
 
