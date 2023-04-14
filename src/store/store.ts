@@ -1,15 +1,21 @@
-import { configureStore } from '@reduxjs/toolkit';
-import rootReducers, { GlobalState, initialRootState, RootState } from './rootReducer';
-import { LocalStorageManager } from '../utils/LocalStorageManager';
-import { reset as resetAppSlice } from './appSlice';
-import { userActions } from './userSlice';
-import { initialState as configInitialState } from './configSlice';
-import { initialState as dialogInitialState } from './dialogSlice';
-import clonedeep from 'lodash.clonedeep';
-import { ReducersManager } from './ReducersManager';
+import { configureStore } from "@reduxjs/toolkit";
+import rootReducers, {
+  GlobalState,
+  initialRootState,
+  RootState,
+} from "./rootReducer";
+import { LocalStorageManager } from "../utils/LocalStorageManager";
+import { reset as resetAppSlice } from "./appSlice";
+import { userActions } from "./userSlice";
+import { initialState as configInitialState } from "./configSlice";
+import { initialState as dialogInitialState } from "./dialogSlice";
+import clonedeep from "lodash.clonedeep";
+import { ReducersManager } from "./ReducersManager";
 
 export const reducersManager = new ReducersManager<GlobalState>(rootReducers);
-export const localStorageManager = new LocalStorageManager<GlobalState>('state');
+export const localStorageManager = new LocalStorageManager<GlobalState>(
+  "state"
+);
 
 localStorageManager.onSave((state) => {
   state.config = clonedeep(configInitialState);
@@ -24,10 +30,12 @@ localStorageManager.onSave((state) => {
 
 const store = configureStore({
   reducer: reducersManager.reduce,
-  preloadedState: localStorageManager.load() || initialRootState
+  preloadedState: localStorageManager.load() || initialRootState,
 });
 
-reducersManager.setChangeListener(() => store.dispatch({ type: 'reducerManager/reducerAdded' }));
+reducersManager.setChangeListener(() =>
+  store.dispatch({ type: "reducersManager/reducersAdded" })
+);
 
 export type AppDispatch = typeof store.dispatch;
 

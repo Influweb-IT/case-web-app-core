@@ -1,4 +1,4 @@
-import { AnyAction, Reducer, ReducersMapObject } from '@reduxjs/toolkit';
+import { AnyAction, Reducer, ReducersMapObject } from "@reduxjs/toolkit";
 
 type Listener = Function;
 type Nullable<T> = T | null;
@@ -10,12 +10,11 @@ type Nullable<T> = T | null;
  * It provides methods for adding and removing reducers from the map, and it creates
  * a combined reducer function that can be passed to the Redux store.
  */
-export class ReducersManager<State> {
-
+export class ReducersManager<S> {
   private reducers: ReducersMapObject;
   private combinedReducer: Reducer;
   private keysToRemove: string[] = [];
-  private changeListener : Nullable<Listener> = null;
+  private changeListener: Nullable<Listener> = null;
 
   /**
    * Creates a `ReducersManager` instance.
@@ -43,10 +42,10 @@ export class ReducersManager<State> {
         const previousStateForKey = state[key];
         const nextStateForKey = reducer(previousStateForKey, action);
 
-        if (typeof nextStateForKey === 'undefined') {
+        if (typeof nextStateForKey === "undefined") {
           throw new Error(
             `A reducer returned undefined when reducing key "${key}" with action type "${action.type}". ` +
-            `This is explicitly prohibited by Redux, if you don't want to handle the action, just return the previous state.`
+              `This is explicitly prohibited by Redux, if you don't want to handle the action, just return the previous state.`
           );
         }
 
@@ -78,7 +77,7 @@ export class ReducersManager<State> {
    * @returns the new state produced, as a result of the reducers applied to `state`
    * @throws If one of the reducers returns undefined, the returned `Reducer` function will throw an `Error` when executed.
    */
-  public reduce = (state: any, action: AnyAction): State => {
+  public reduce = (state: any, action: AnyAction): S => {
     if (this.keysToRemove.length > 0) {
       state = { ...state };
       for (const key of this.keysToRemove) {
@@ -100,20 +99,28 @@ export class ReducersManager<State> {
     const intersectingKeys = intersect(this.reducers, reducerMap);
 
     if (intersectingKeys.length > 0) {
-      throw new Error(`The map provided contains keys already associated to other reducers. This is not allowed.` +
-        `Check the following key: ${intersectingKeys.join(', ')}`);
+      throw new Error(
+        `The map provided contains keys already associated to other reducers. This is not allowed.` +
+          `Check the following key: ${intersectingKeys.join(", ")}`
+      );
     }
 
-    this.combinedReducer = this.combineReducers({ ...this.reducers, ...reducerMap });
+    this.combinedReducer = this.combineReducers({
+      ...this.reducers,
+      ...reducerMap,
+    });
 
     if (this.changeListener !== null) {
       this.changeListener();
     }
 
-    function intersect(currentMap: ReducersMapObject, newMap: ReducersMapObject) {
-      return Object
-        .keys(currentMap)
-        .filter((key) => { return newMap.hasOwnProperty(key); });
+    function intersect(
+      currentMap: ReducersMapObject,
+      newMap: ReducersMapObject
+    ) {
+      return Object.keys(currentMap).filter((key) => {
+        return newMap.hasOwnProperty(key);
+      });
     }
   };
 
@@ -132,9 +139,17 @@ export class ReducersManager<State> {
     this.combinedReducer = this.combineReducers(this.reducers);
   };
 
-  public setChangeListener(listener: () => { }) {
+  /**
+   * Add a listener to be execute after reducers are added.
+   * This gives a chance to perform actions after adding reducers.
+   * Most notably, sending a reserved event in order to initialize the newly
+   * added reducers, like redux does after creating the store.
+   *
+   * @param listener
+   */
+  public setChangeListener(listener: Listener) {
     if (this.changeListener !== null) {
-      throw new Error('Only one change listener is allowed');
+      throw new Error("Only one change listener is allowed");
     }
 
     this.changeListener = listener;
