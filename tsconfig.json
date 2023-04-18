@@ -6,6 +6,7 @@
       }
     ],
     "declaration": true,
+    "declarationMap": true,
     "declarationDir": "build",
     "module": "esnext",
     "target": "es5",
